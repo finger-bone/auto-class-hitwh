@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+</head>
+<body>
+    <div id='prompt'>在列表中选中欲选的课后，点击开始抢课即可，此后便可以关闭此页面。控制台中输出的有效代表此次表单正常提交到了服务器，而非选课成功。如果无效次数过多，请检查网络连接，也有可能是网络过于拥挤。在确定选上课后，用Ctrl-C在终端中结束服务器。</div>
+    <form method='post'>
+        <input type="submit" name="submit" value="开始抢课"><br>
+        <label>课程列表</label><br>
+        <table>
+            {% for each in courses%}
+                <tr>
+                    <td>
+                        <input type='checkbox' name={{each.id}} value={{each.id+'|'+each.kind}}>
+                    </td>
+                    <td>
+                        {{each.name}}
+                    </td>
+                    <td>
+                        {{each.detail}}
+                    </td>
+            {% endfor %}
+        </table>
+    </form>
+</body>
+</html>

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+</head>
+<body>
+    <div id='prompt'>点击查询后需等待数据爬取，请勿刷新页面；如果出错，请刷新页面重试。</div><br>
+    <form method='post' id='form'>
+        <label>学号</label>
+        <input type="text" id="name" name="username"/><br>
+        <label>统一身份认证密码</label>
+        <input type="password" id="password" name="password"><br>
+        <label>是否使用VPN</label><br>
+        <input type="radio" name="vpn" value="1"/>是<br>
+        <input type="radio" name="vpn" value="0"/>否<br>
+        <label>学期开始年份</label>
+        <select id="year" name="year">
+            {% for each in years%}
+            <option value="{{ each }}">{{ each }}</option>
+            {% endfor %}
+        </select><br>
+        <label>学期</label><br>
+        <input type="radio" name="term" value="1"/>秋季学期<br>
+        <input type="radio" name="term" value="2"/>春季学期<br>
+        <input type="radio" name="term" value="3"/>夏季学期<br>
+        <input type="submit" name="submit" value="查询">
+    </form>
+</body>
+</html>
