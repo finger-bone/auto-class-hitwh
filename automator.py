@@ -48,6 +48,18 @@ class Automator:
             self.query_list_url = '''http://172-26-64-16.ivpn.hitwh.edu.cn:8118/xsxk/queryXsxkList'''
             self.submit_url = '''http://172-26-64-16.ivpn.hitwh.edu.cn:8118/xsxk/saveXsxk'''
 
+    def set_vpn(self, vpn: bool):
+        self.vpn = vpn
+        if not vpn:
+            self.login_url = '''http://authserver.hitwh.edu.cn/authserver/login?service=http%3A%2F%2F172.26.64.16%2FloginCAS'''
+            self.query_list_url = '''http://172.26.64.16/xsxk/queryXsxkList'''
+            self.submit_url = '''http://172.26.64.16/xsxk/saveXsxk'''
+        else:
+            self.login_url = '''http://authserver-hitwh-edu-cn.ivpn.hitwh.edu.cn:8118/authserver/login?service=https%3A%2F%2Fivpn.hitwh.edu.cn%2Fauth%2Fcas_validate%3Fentry_id%3D1'''
+            self.admin_url = '''http://172-26-64-16.ivpn.hitwh.edu.cn:8118/loginCAS'''
+            self.query_list_url = '''http://172-26-64-16.ivpn.hitwh.edu.cn:8118/xsxk/queryXsxkList'''
+            self.submit_url = '''http://172-26-64-16.ivpn.hitwh.edu.cn:8118/xsxk/saveXsxk'''
+
     def __del__(self) -> None:
         self.session.close()
 
@@ -65,7 +77,7 @@ class Automator:
             '//*[@id="pwdDefaultEncryptSalt"]/@value')[0]
         # pwdDefaultEncryptSalt = '''LWxdhueboDGfIh9P'''
         pwd = self.js.call('encryptAES', raw_pwd, pwdDefaultEncryptSalt)
-        redirect = self.session.post(self.login_url, headers=self.base_header,
+        self.session.post(self.login_url, headers=self.base_header,
                                      data={
                                          'username': un,
                                          'password': pwd,
