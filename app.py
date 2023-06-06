@@ -65,5 +65,5 @@ def final():
     return render_template('final.html')
 
 if __name__ == '__main__':
-    app.run()
     webbrowser.open('http://127.0.0.1:5000')
+    app.run()
