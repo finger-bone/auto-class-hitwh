@@ -116,24 +116,28 @@ class Automator:
         single_paged = len(html.xpath(
             '/html/body/div[7]/div/div[7]/form')) == 0
 
-        def parse(raw: str) -> list[Course]:
+        def parse(raw: str):
             soup = bs(raw, 'html.parser')
             table = soup.select_one(
                 'body > div.Contentbox > div > div.list > table')
             ret = []
             # 0 is the header
-            for tr in table.select('tr')[1:]:
-                tds = tr.find_all('td')
-                ret.append(
-                    Course(
-                        tds[2].text,
-                        tds[3].text,
-                        tds[7].text,
-                        tds[-1].select_one('input')['id'].strip('xkyq_'),
-                        semester,
-                        kind
+            try:
+                for tr in table.select('tr')[1:]:
+                    tds = tr.find_all('td')
+                    ret.append(
+                        Course(
+                            tds[2].text,
+                            tds[3].text,
+                            tds[7].text,
+                            tds[-1].select_one('input')['id'].strip('xkyq_'),
+                            semester,
+                            kind
+                        )
                     )
-                )
+            except:
+                # no valid class
+                pass
             return ret
 
         if single_paged:

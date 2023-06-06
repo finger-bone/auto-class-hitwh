@@ -1,8 +1,8 @@
-from flask import Flask, request, render_template, flash, redirect, session
-from automator import Automator, Course
-from threading import Thread, current_thread
+from flask import Flask, request, render_template, redirect, session
+from automator import Automator
+from threading import Thread
 
-THREAD_COUNT = 2
+THREAD_COUNT = 5
 
 app = Flask(__name__)
 app.secret_key = 'dev'
@@ -19,7 +19,7 @@ def main():
         session['semester'] = f'{int(year)}-{int(year)+1}{semester}'
         session['vpn'] = (request.form.get('vpn') == '1')
         return redirect('/select')
-    return render_template('login.html', years=range(2022, 2050))
+    return render_template('login.html', years=range(2020, 2050))
 
 @app.route('/select', methods=['GET', 'POST'])
 def select():
@@ -33,10 +33,10 @@ def select():
                 continue
             # id kind semester
             target.append([*str(v).split('|'), session['semester']])
-        
+
         session['target'] = target
         return redirect('/final')
-    
+
     query.fetch_all(session['semester'])
     # print(auto.data)
     return render_template('auto.html', courses=query.data)
@@ -55,10 +55,13 @@ def final():
                 try:
                     print(f'尝试抢课，id为{each[0]}')
                     print('有效' if auto.submit(each[0], each[1], each[2]) else '无效')
-                except Exception as e:
+                except Exception:
                     print('无效')
     ths = [Thread(target=op) for _ in range(THREAD_COUNT)]
     for each in ths:
         each.start()
-    
+
     return render_template('final.html')
+
+if __name__ == '__main__':
+    app.run()
