@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template, redirect, session
 from automator import Automator
 from threading import Thread
+import webbrowser
 
 THREAD_COUNT = 5
 
@@ -65,3 +66,4 @@ def final():
 
 if __name__ == '__main__':
     app.run()
+    webbrowser.open('http://127.0.0.1:5000')

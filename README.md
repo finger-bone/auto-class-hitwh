@@ -61,7 +61,7 @@ pip install -r requirements.txt
 在当项目目录下执行
 
 ```shell
-flask run
+python app.py
 ```
 
 或者直接运行`run.cmd`或`run.sh`
