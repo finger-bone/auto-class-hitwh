@@ -3,7 +3,7 @@ from automator import Automator
 from threading import Thread
 import webbrowser
 
-THREAD_COUNT = 5
+THREAD_COUNT = 2
 
 app = Flask(__name__)
 app.secret_key = 'dev'
