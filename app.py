@@ -3,10 +3,9 @@ from automator import Automator
 from threading import Thread
 import webbrowser
 
-THREAD_COUNT = 2
-
 app = Flask(__name__)
 app.secret_key = 'dev'
+THREAD_CNT_MAX = 10
 
 @app.route('/', methods=['GET', 'POST'])
 def main():
@@ -29,18 +28,18 @@ def select():
     if request.method == 'POST':
         target = []
         # print(request.form)
+        session['thread'] = request.form.get('thread')
         for k, v in request.form.items():
-            if k == 'submit':
+            if k == 'submit' or k == 'thread':
                 continue
             # id kind semester
             target.append([*str(v).split('|'), session['semester']])
-
         session['target'] = target
         return redirect('/final')
 
     query.fetch_all(session['semester'])
     # print(auto.data)
-    return render_template('auto.html', courses=query.data)
+    return render_template('auto.html', courses=query.data, thread_cnts=range(1, THREAD_CNT_MAX + 1))
 
 @app.route('/final')
 def final():
@@ -58,7 +57,7 @@ def final():
                     print('有效' if auto.submit(each[0], each[1], each[2]) else '无效')
                 except Exception:
                     print('无效')
-    ths = [Thread(target=op) for _ in range(THREAD_COUNT)]
+    ths = [Thread(target=op) for _ in range(int(session['thread']))]
     for each in ths:
         each.start()
 
