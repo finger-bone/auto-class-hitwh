@@ -55,6 +55,7 @@ def final():
                 try:
                     print(f'尝试抢课，id为{each[0]}')
                     print('有效' if auto.submit(each[0], each[1], each[2]) else '无效')
+                    print(f'同类课程已选上：{auto.selected(each[1], each[2])}')
                 except Exception:
                     print('无效')
     ths = [Thread(target=op) for _ in range(int(session['thread']))]

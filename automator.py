@@ -4,6 +4,7 @@ import execjs
 from dataclasses import dataclass
 from bs4 import BeautifulSoup as bs
 from requests.packages import urllib3
+import re
 
 urllib3.disable_warnings()
 
@@ -37,16 +38,7 @@ class Automator:
         self.all_kinds = ['yy', 'ty', 'szhx',
             'cxyx', 'cxsy', 'cxcy', 'tsk', 'xsxk']
         self.data = []
-        self.vpn = vpn
-        if not vpn:
-            self.login_url = '''http://authserver.hitwh.edu.cn/authserver/login?service=http%3A%2F%2F172.26.64.16%2FloginCAS'''
-            self.query_list_url = '''http://172.26.64.16/xsxk/queryXsxkList'''
-            self.submit_url = '''http://172.26.64.16/xsxk/saveXsxk'''
-        else:
-            self.login_url = '''http://authserver-hitwh-edu-cn.ivpn.hitwh.edu.cn:8118/authserver/login?service=https%3A%2F%2Fivpn.hitwh.edu.cn%2Fauth%2Fcas_validate%3Fentry_id%3D1'''
-            self.admin_url = '''http://172-26-64-16.ivpn.hitwh.edu.cn:8118/loginCAS'''
-            self.query_list_url = '''http://172-26-64-16.ivpn.hitwh.edu.cn:8118/xsxk/queryXsxkList'''
-            self.submit_url = '''http://172-26-64-16.ivpn.hitwh.edu.cn:8118/xsxk/saveXsxk'''
+        self.set_vpn(vpn)
 
     def set_vpn(self, vpn: bool):
         self.vpn = vpn
@@ -54,11 +46,13 @@ class Automator:
             self.login_url = '''http://authserver.hitwh.edu.cn/authserver/login?service=http%3A%2F%2F172.26.64.16%2FloginCAS'''
             self.query_list_url = '''http://172.26.64.16/xsxk/queryXsxkList'''
             self.submit_url = '''http://172.26.64.16/xsxk/saveXsxk'''
+            self.selected_url = '''http://172.26.64.16/xsxk/queryYxkc'''
         else:
             self.login_url = '''http://authserver-hitwh-edu-cn.ivpn.hitwh.edu.cn:8118/authserver/login?service=https%3A%2F%2Fivpn.hitwh.edu.cn%2Fauth%2Fcas_validate%3Fentry_id%3D1'''
             self.admin_url = '''http://172-26-64-16.ivpn.hitwh.edu.cn:8118/loginCAS'''
             self.query_list_url = '''http://172-26-64-16.ivpn.hitwh.edu.cn:8118/xsxk/queryXsxkList'''
             self.submit_url = '''http://172-26-64-16.ivpn.hitwh.edu.cn:8118/xsxk/saveXsxk'''
+            self.selected_url = '''http://172-26-64-16.ivpn.hitwh.edu.cn:8118/xsxk/queryYxkc'''
 
     def __del__(self) -> None:
         self.session.close()
@@ -196,10 +190,34 @@ class Automator:
                 },
                 verify=False
             ).status_code == 302
+        
+    def selected(self, kind: str, semester: str):
+        try:
+            raw = self.session.get(
+                self.selected_url,
+                headers=self.base_header,
+                params={
+                    'pageXklb': kind,
+                    'pageXnxq': semester
+                },
+                verify=False
+            ).text
+            soup = bs(raw, 'html.parser')
+            table = soup.select_one('body > div.Contentbox > div > div.list > table')
+            trs = table.select('tr')[1:]
+            names = []
+            for tr in trs:
+                tds = tr.find_all('td')
+                names.append(tds[3].text)
+            return names
+        except:
+            return []
 
 # auto = Automator(False)
 # auto.submit('xkyq_2022-2023-2-AD22923-002', 'szhx', '2022-20232')
 
+# auto = Automator(True)
+# print(auto.selected('szhx', '2022-20232'))
 
 # auto.fetch_all('2022-20232')
 # print(auto.data)
