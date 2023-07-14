@@ -2,17 +2,96 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
+    <style>
+
+        /* Style for the prompt div */
+.prompt {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px;
+  margin-bottom: 20px;
+  border: 1px solid #f5c6cb;
+  border-radius: 5px;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+
+/* Style for the form */
+form {
+  margin-bottom: 20px;
+}
+
+/* Style for the label */
+label {
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+
+/* Style for the select element */
+select {
+  margin-bottom: 10px;
+  padding: 8px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+  width: 100%;
+  max-width: 300px;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+
+/* Style for the submit button */
+input[type="submit"] {
+  background-color: #007bff;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+
+/* Style for the table */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+
+/* Style for the table cells */
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+/* Style for the table header */
+th {
+  border: 1px solid #ddd;
+  padding: 8px;
+  background-color: #f2f2f2;
+}
+
+/* Style for the input element */
+input[type="submit"] {
+  background-color: #007bff;
+  color: #fff;
+  padding: 8px 16px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+  font-family: "Microsoft YaHei", sans-serif;
+}
+    </style>
 </head>
 <body>
-    <div id='prompt'>在列表中选中欲选的课后，点击开始抢课即可，此后便可以关闭此页面。控制台中输出的有效代表此次表单正常提交到了服务器，而非选课成功。如果无效次数过多，请检查网络连接，也有可能是网络过于拥挤。在确定选上课后，用Ctrl-C在终端中结束服务器。</div>
+    <div class='prompt'>在列表中选中欲选的课后，点击开始抢课即可，此后便可以关闭此页面。控制台中输出的有效代表此次表单正常提交到了服务器，而非选课成功。如果无效次数过多，请检查网络连接，也有可能是网络过于拥挤。在确定选上课后，用Ctrl-C在终端中结束服务器。</div>
     <form method='post'>
-        线程数越多抢课越快，但是线程数过多可能回导致本机网络拥挤，一般而言抢一个课最多2个线程，抢两个课最多5个线程<br>
+        <p class='prompt'>线程数越多抢课越快，但是线程数过多可能回导致本机网络拥挤，使用vpn时，由于系统限制，只能使用一个线程，一般而言抢一个课最多2个线程，抢两个课最多5个线程</p><br>
         <label>线程数</label>
         <select id="thread" name="thread">
             {% for each in thread_cnts%}
             <option value="{{ each }}">{{ each }}</option>
             {% endfor %}
-        </select><br>
+        </select>
         <input type="submit" name="submit" value="开始抢课"><br>
         <label>课程列表</label><br>
         <table>
