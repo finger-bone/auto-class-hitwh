@@ -69,3 +69,22 @@ python app.py
 ### 3. 使用
 
 启动服务器后，使用浏览器打开`localhost:5000`或`127.0.0.1:5000`，按照指示使用即可
+
+
+## 评教shortcut
+
+By the way, 只要进入评教页面，在有几个进度条的一页，通过dev tools，执行这段js代码，
+
+```js
+document.queryform.action = "/xspjgd/TjAllpj";
+$("#queryform").ajaxSubmit(function(result){
+if(result=="0"){
+    alert("操作成功!");
+    reset();
+}else{
+    alert("操作失败!");
+}
+});
+```
+
+即可直接提交评教，不需要选任何东西。~~很明显，平台只做了前端的验证却没在后端验证。~~
