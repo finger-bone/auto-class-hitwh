@@ -1,9 +1,3 @@
----
-runme:
-  id: 01HPHJ1Z6C57EV8MBMCCK8MT2P
-  version: v2.2
----
-
 # HITWH抢课
 
 ## 项目介绍
