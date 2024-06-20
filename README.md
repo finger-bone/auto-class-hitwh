@@ -40,6 +40,8 @@ auto.submit(<课程ID>, <课程类型>, <学期>)
 
 ## Docker部署
 
+下文已经不必要，直接docker compose up, 使用localhost:7777即可。
+
 现已经支持docker部署。以下操作也可用docker desktop完成，或者使用github code space等远程部署，或其它方式，~~如果不想用cli，Docker相关知识请自学~~。
 
 需要安装docker https://www.docker.com
