@@ -85,7 +85,8 @@ input[type="submit"] {
 <body>
     <div class='prompt'>在列表中选中欲选的课后，点击开始抢课即可，此后便可以关闭此页面。控制台中输出的有效代表此次表单正常提交到了服务器，而非选课成功。如果无效次数过多，请检查网络连接，也有可能是网络过于拥挤。在确定选上课后，用Ctrl-C在终端中结束服务器。</div>
     <form method='post'>
-        <p class='prompt'>线程数越多抢课越快，但是线程数过多可能回导致本机网络拥挤，使用vpn时，由于系统限制，只能使用一个线程，一般而言抢一个课最多2个线程，抢两个课最多5个线程</p><br>
+        <p class='prompt'>线程数越多抢课越快，但是线程数过多可能回导致本机网络拥挤，使用vpn时，由于系统限制，只能使用一个线程。</p><br>
+        <p class='prompt'>经测试，不推荐使用除1以外的数值</p><br>
         <label>线程数</label>
         <select id="thread" name="thread">
             {% for each in thread_cnts%}
