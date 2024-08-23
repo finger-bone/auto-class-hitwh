@@ -2,10 +2,12 @@ from flask import Flask, request, render_template, redirect, session
 from automator import Automator
 from threading import Thread
 import webbrowser
+import logging
 
 app = Flask(__name__)
 app.secret_key = 'dev'
 THREAD_CNT_MAX = 10
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 @app.route('/', methods=['GET', 'POST'])
 def main():
@@ -53,11 +55,11 @@ def final():
         while True:
             for each in target:
                 try:
-                    print(f'尝试抢课，id为{each[0]}')
-                    print('有效' if auto.submit(each[0], each[1], each[2]) else '无效')
-                    print(f'同类课程已选上：{auto.selected(each[1], each[2])}')
+                    logging.info(f'尝试抢课，id为{each[0]}')
+                    logging.info('有效' if auto.submit(each[0], each[1], each[2]) else '无效')
+                    logging.info(f'同类课程已选上：{auto.selected(each[1], each[2])}')
                 except Exception:
-                    print('无效')
+                    logging.info('无效')
     ths = [Thread(target=op) for _ in range(int(session['thread']))]
     for each in ths:
         each.start()

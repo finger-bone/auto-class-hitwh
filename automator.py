@@ -36,7 +36,7 @@ class Automator:
             # 'Referer': '''http://authserver.hitwh.edu.cn/authserver/login?service=http%3A%2F%2F172.26.64.16%2FloginCAS'''
         }
         self.all_kinds = ['yy', 'ty', 'szhx',
-            'cxyx', 'cxsy', 'cxcy', 'tsk', 'xsxk']
+            'cxyx', 'cxsy', 'cxcy', 'tsk', 'xsxk', 'xsyt']
         self.data = []
         self.set_vpn(vpn)
 
