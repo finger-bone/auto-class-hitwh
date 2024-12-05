@@ -1,0 +1,13 @@
+[project]
+authors = ["Zend <zendwang040302@outlook.com>"]
+channels = ["conda-forge"]
+description = "Add a short description here"
+name = "auto-class-hitwh"
+platforms = ["osx-arm64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+python = ">=3.12.5,<4"
+pip = ">=24.2,<25"
