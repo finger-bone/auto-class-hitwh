@@ -57,8 +57,11 @@ jobs:
       - name: Compile for Linux
         run: deno compile --target x86_64-unknown-linux-gnu -o ./dist/auto-class-linux -A ./main.ts
 
-      - name: Compile for macOS
-        run: deno compile --target x86_64-apple-darwin -o ./dist/auto-class-macos -A ./main.ts
+      - name: Compile for macOS Arm
+        run: deno compile --target aarch64-apple-darwin -o ./dist/auto-class-macos-aarch64 -A ./main.ts
+
+      - name: Compile for macOS Intel
+        run: deno compile --target x86_64-apple-darwin -o ./dist/auto-class-macos-x86_64 -A ./main.ts
 
       - name: Compile for Windows
         run: deno compile --target x86_64-pc-windows-msvc -o ./dist/auto-class-windows.exe -A ./main.ts
