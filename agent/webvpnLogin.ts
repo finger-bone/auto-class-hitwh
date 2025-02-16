@@ -1,11 +1,9 @@
 import { Axios } from "axios";
-import { Buffer } from "node:buffer";
 import * as cheerio from "cheerio";
 import {
   AUTHORIZATION_URL,
   LOGIN_PAGE_URL,
   LOGIN_SUFFIX,
-  QRCODE_FILE,
 } from "./endpoints.ts";
 
 export async function getQRCode(
@@ -20,11 +18,11 @@ export async function getQRCode(
   const uuid = uuidResponse.data;
 
   const qrCodeUrl = `${AUTHORIZATION_URL}/qrCode/getCode?vpn-1&uuid=${uuid}`;
-  const qrCodeResponse = await session.get(qrCodeUrl, {
-    responseType: "arraybuffer",
-  });
-  const qrCodeBuffer = Buffer.from(qrCodeResponse.data, "binary");
-  await Deno.writeFile(QRCODE_FILE, qrCodeBuffer);
+  // const qrCodeResponse = await session.get(qrCodeUrl, {
+  //   responseType: "arraybuffer",
+  // });
+  // const qrCodeBuffer = Buffer.from(qrCodeResponse.data, "binary");
+  // await Deno.writeFile(QRCODE_FILE, qrCodeBuffer);
   return { uuid, qrCodeUrl };
 }
 

@@ -32,7 +32,11 @@ export async function submitRequest(
   semester: Semester,
   code: string,
 ): Promise<
-  "success" | "notWithinTime" | "alreadySubmitted" | "unknownError"
+  | "success"
+  | "notWithinTime"
+  | "illegalOperation"
+  | "alreadySubmitted"
+  | "unknownError"
 > {
   const token = await getToken(session, cookies, courseType, semester);
   const formData = new URLSearchParams();

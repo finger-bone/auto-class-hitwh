@@ -67,5 +67,3 @@ function isUsed() {
 登陆要带上 cookie，cookie 在访问页面时直接获得。
 
 保持 Cookie 后可进入选课系统，可直接处理表单。
-
-npm:inquirer qrcode-terminal ora chalk cli-table3 axios

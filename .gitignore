@@ -1,3 +1,5 @@
 dist
 deno.lock
 .DS_Store
+*.png
+*.txt

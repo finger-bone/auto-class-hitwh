@@ -6,18 +6,18 @@ import {
 } from "./agent/webvpnLogin.ts";
 import { configureHeaders } from "./agent/configure.ts";
 import { fetchCourses } from "./agent/adminFetcher.ts";
+import ProgressBar from "progress";
 import { adminLogin } from "./agent/adminLogin.ts";
 import { parseCourses } from "./parser/courseParser.ts";
 import { submitRequest } from "./agent/submit.ts";
 import prompts from "prompts";
 import chalk from "chalk";
 import ora from "ora";
-import Table from "cli-table3";
 import fs from "node:fs";
 import type { Course } from "./parser/courseParser.ts";
 import type { CourseType } from "./agent/adminFetcher.ts";
 import type { Semester } from "./agent/adminFetcher.ts";
-import process, { title } from "node:process";
+import process from "node:process";
 import path from "node:path";
 import { Buffer } from "node:buffer";
 
@@ -252,16 +252,66 @@ const main = async () => {
       instructions: false,
     }) as { courseTypes: CourseType[] };
 
-    // 获取课程数据
-    const spinner = ora("正在解析课程数据...").start();
+    const bar = new ProgressBar(
+      "正在获取课程数据 [:bar] :current/:total 类型 :message",
+      {
+        width: 40,
+        total: courseTypes.length,
+        complete: "█",
+        incomplete: "░",
+        renderThrottle: 100,
+      },
+    );
+
+    let currentType = "";
+    let pageBar: ProgressBar | null = null;
+
     const coursesHtmls = await fetchCourses(
       session,
       cookies,
       courseTypes,
       semesterResponse,
-    );
-    const parsedCoursesByType = parseCourses(coursesHtmls);
+      (page, pageCount) => {
+        if (pageCount && !pageBar) {
+          // 初始化分页进度条
+          pageBar = new ProgressBar(
+            `   ${currentType} 分页 [:bar] :page/:pages`,
+            {
+              width: 30,
+              total: pageCount,
+              complete: "■",
+              incomplete: "▫",
+              renderThrottle: 50,
+            },
+          );
+          pageBar.tick({
+            page: page,
+            pages: pageCount || "?",
+          });
+        }
 
+        if (pageBar) {
+          pageBar.tick({
+            page: page,
+            pages: pageCount || "?",
+          });
+
+          // 分页完成后重置
+          if (page === pageCount) {
+            pageBar = null;
+          }
+        }
+      },
+      (courseType) => {
+        currentType = COURSE_TYPE_MAP[courseType];
+        bar.tick({
+          message: currentType,
+        });
+      },
+    );
+
+    const spinner = ora("正在解析课程数据...").start();
+    const parsedCoursesByType = parseCourses(coursesHtmls);
     let allCourses: Course[] = [];
     for (const [type, courses] of Object.entries(parsedCoursesByType)) {
       allCourses = allCourses.concat(
@@ -272,7 +322,10 @@ const main = async () => {
 
     // 新增筛选流程
     const filtered = await filterCourses(allCourses);
-    // displayCourses(filtered);
+    if (!filtered || filtered.length === 0) {
+      console.log(chalk.yellow("\n未找到符合条件的课程"));
+      process.exit();
+    }
 
     // 增强的选择流程
     const selected = await selectCourses(filtered);
