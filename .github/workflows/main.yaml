@@ -72,7 +72,6 @@ jobs:
           files: |
             ./dist/auto-class-windows.exe
             ./dist/auto-class-linux
-          args: -fq --best
 
       - name: Create a Git tag
         run: |
