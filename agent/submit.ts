@@ -50,10 +50,20 @@ export async function submitRequest(
     },
   });
   const notWithinTimeKw = "alert('不在学生选课时间范围内！')";
-  // TODO: 教务系统不再时间段内无法测试
+  const illegalOperationKw = "alert('非法操作！');";
+  // TODO: THIS ONE IS FOR PLACE HOLDING
+  const duplicateSubmissionKw = "alert('您已经提交过该课程！')";
+  // TODO: SHOULD BE CHANGED INTO A PERFECT MATCH
+  const successKw = /alert\('*成功*'\)/;
   if (resp.data.includes(notWithinTimeKw)) {
     return "notWithinTime";
-  } else {
+  } else if (resp.data.includes(illegalOperationKw)) {
+    return "illegalOperation";
+  } else if (successKw.test(resp.data)) {
     return "success";
+  } else if (resp.data.includes(duplicateSubmissionKw)) {
+    return "alreadySubmitted";
+  } else {
+    return "unknownError";
   }
 }

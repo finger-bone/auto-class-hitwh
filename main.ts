@@ -187,9 +187,15 @@ const main = async () => {
     let cookies: string;
 
     if (loginType === "qr") {
-      const loginResult = await handleQRLogin();
-      session = loginResult.session;
-      cookies = loginResult.cookies;
+      try {
+        const loginResult = await handleQRLogin();
+        session = loginResult.session;
+        cookies = loginResult.cookies;
+      } catch (e) {
+        console.log(`错误：${e}`);
+        console.log(`程序将退出，请重试。`);
+        process.exit();
+      }
     } else if (loginType === "manual") {
       const response = await prompts({
         type: "text",
@@ -352,14 +358,19 @@ const main = async () => {
             code,
           );
           if (result === "success") {
-            submitSpinner.succeed(`[${type}] ${code} ${name} 申请成功`);
+            submitSpinner.succeed(`[${type}] ${code} ${name}：申请成功`);
             succeeded.push(code);
           } else if (result === "notWithinTime") {
-            submitSpinner.fail(
-              `[${type}] ${code} ${name} 申请失败：不在选课时间范围内！`,
+            submitSpinner.warn(
+              `[${type}] ${code} ${name}：不在选课时间范围内！`,
+            );
+          } else if (result === "alreadySubmitted") {
+            succeeded.push(code);
+            submitSpinner.succeed(
+              `[${type}] ${code} ${name}：重复了已成功的申请！`,
             );
           } else {
-            submitSpinner.fail(`[${type}] ${code} ${name} 失败: ${result}`);
+            submitSpinner.fail(`[${type}] ${code} ${name}: 其它错误 ${result}`);
           }
         } catch (err) {
           submitSpinner.fail(
