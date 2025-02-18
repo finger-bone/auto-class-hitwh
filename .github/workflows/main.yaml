@@ -12,7 +12,6 @@ on:
       - created
 
 jobs:
-  # 自动格式化代码并提交
   format:
     runs-on: ubuntu-latest
     steps:
@@ -65,6 +64,15 @@ jobs:
 
       - name: Compile for Windows
         run: deno compile --target x86_64-pc-windows-msvc -o ./dist/auto-class-windows.exe -A ./main.ts
+
+      - name: Run UPX
+        uses: crazy-max/ghaction-upx@v3
+        with:
+          version: latest
+          files: |
+            ./dist/auto-class-windows.exe
+            ./dist/auto-class-linux
+          args: -fq --best
 
       - name: Create a Git tag
         run: |
