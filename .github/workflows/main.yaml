@@ -40,7 +40,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  # 编译并发布文件
   compile:
     runs-on: ubuntu-latest
     needs: format
@@ -64,14 +63,6 @@ jobs:
 
       - name: Compile for Windows
         run: deno compile --target x86_64-pc-windows-msvc -o ./dist/auto-class-windows.exe -A ./main.ts
-
-      - name: Run UPX
-        uses: crazy-max/ghaction-upx@v3
-        with:
-          version: latest
-          files: |
-            ./dist/auto-class-windows.exe
-            ./dist/auto-class-linux
 
       - name: Create a Git tag
         run: |
