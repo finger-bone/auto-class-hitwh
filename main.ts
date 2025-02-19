@@ -92,7 +92,7 @@ async function selectCourses(courses: Course[]) {
     instructions: false,
   });
 
-  return selected.map((code: string) => courses.find((c) => c.code === code));
+  return selected.map((code: string) => courses.find((c) => c.code === code)) as Course[];
 }
 
 // 二维码登录流程
@@ -132,9 +132,11 @@ const handleQRLogin = async (): Promise<
     }
     await new Promise((resolve) => setTimeout(resolve, 1000));
   }
-
+  const login_spinner = ora("正在登录 WebVPN...").start();
   const cookies = await webvpnLogin(session, uuid);
+  login_spinner.text = "正在登录教务系统...";
   await adminLogin(session, cookies);
+  login_spinner.succeed("登录教务系统成功");
   fs.writeFileSync(COOKIE_FILE, cookies);
   console.log(
     chalk.green("\n当前Cookies已经写入："),
@@ -344,33 +346,47 @@ const main = async () => {
     const submitSpinner = ora("正在提交选课申请...").start();
     const succeeded = [] as string[];
 
-    while (succeeded.length < selected.length) {
+    while (
+      !selected.every(
+        ({ code }) => succeeded.includes(code)
+      )
+    ) {
       for (const { code, type, name } of selected) {
         if (succeeded.includes(code)) {
           continue;
         }
         try {
+          const now = new Date();
+          const formattedTime = now.toLocaleString('zh-CN', { 
+              year: 'numeric', 
+              month: '2-digit', 
+              day: '2-digit', 
+              hour: '2-digit', 
+              minute: '2-digit', 
+              second: '2-digit', 
+              fractionalSecondDigits: 3 
+          }).replace(' ', '时间：'); // 使用 T 来分隔日期和时间
           const result = await submitRequest(
             session,
             cookies,
-            type,
+            type as CourseType,
             semesterResponse,
             code,
           );
           if (result === "success") {
-            submitSpinner.succeed(`[${type}] ${code} ${name}：申请成功`);
+            submitSpinner.succeed(`[${formattedTime}] ${type} ${code} ${name}：申请成功`);
             succeeded.push(code);
           } else if (result === "notWithinTime") {
             submitSpinner.warn(
-              `[${type}] ${code} ${name}：不在选课时间范围内！`,
+              `[${formattedTime}] [${type}] ${code} ${name}：不在选课时间范围内！`,
             );
           } else if (result === "alreadySubmitted") {
             succeeded.push(code);
             submitSpinner.succeed(
-              `[${type}] ${code} ${name}：重复了已成功的申请！`,
+              `[${formattedTime}] [${type}] ${code} ${name}：重复了已成功的申请！`,
             );
           } else {
-            submitSpinner.fail(`[${type}] ${code} ${name}: 其它错误 ${result}`);
+            submitSpinner.fail(`[${formattedTime}] [${type}] ${code} ${name}: 其它错误 ${result}`);
           }
         } catch (err) {
           submitSpinner.fail(
