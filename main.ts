@@ -92,7 +92,9 @@ async function selectCourses(courses: Course[]) {
     instructions: false,
   });
 
-  return selected.map((code: string) => courses.find((c) => c.code === code)) as Course[];
+  return selected.map((code: string) =>
+    courses.find((c) => c.code === code)
+  ) as Course[];
 }
 
 // 二维码登录流程
@@ -348,7 +350,7 @@ const main = async () => {
 
     while (
       !selected.every(
-        ({ code }) => succeeded.includes(code)
+        ({ code }) => succeeded.includes(code),
       )
     ) {
       for (const { code, type, name } of selected) {
@@ -357,15 +359,15 @@ const main = async () => {
         }
         try {
           const now = new Date();
-          const formattedTime = now.toLocaleString('zh-CN', { 
-              year: 'numeric', 
-              month: '2-digit', 
-              day: '2-digit', 
-              hour: '2-digit', 
-              minute: '2-digit', 
-              second: '2-digit', 
-              fractionalSecondDigits: 3 
-          }).replace(' ', '时间：'); // 使用 T 来分隔日期和时间
+          const formattedTime = now.toLocaleString("zh-CN", {
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            fractionalSecondDigits: 3,
+          }).replace(" ", "时间："); // 使用 T 来分隔日期和时间
           const result = await submitRequest(
             session,
             cookies,
@@ -374,7 +376,9 @@ const main = async () => {
             code,
           );
           if (result === "success") {
-            submitSpinner.succeed(`[${formattedTime}] ${type} ${code} ${name}：申请成功`);
+            submitSpinner.succeed(
+              `[${formattedTime}] ${type} ${code} ${name}：申请成功`,
+            );
             succeeded.push(code);
           } else if (result === "notWithinTime") {
             submitSpinner.warn(
@@ -386,7 +390,9 @@ const main = async () => {
               `[${formattedTime}] [${type}] ${code} ${name}：重复了已成功的申请！`,
             );
           } else {
-            submitSpinner.fail(`[${formattedTime}] [${type}] ${code} ${name}: 其它错误 ${result}`);
+            submitSpinner.fail(
+              `[${formattedTime}] [${type}] ${code} ${name}: 其它错误 ${result}`,
+            );
           }
         } catch (err) {
           submitSpinner.fail(
