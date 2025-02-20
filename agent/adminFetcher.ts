@@ -8,6 +8,7 @@ export type CourseType =
   | "szhx"
   | "cxyx"
   | "cxsy"
+  | "cxcy"
   | "xsyt"
   | "tsk"
   | "xsxk";
@@ -93,6 +94,7 @@ export async function fetchCourses(
     xsyt: [],
     tsk: [],
     xsxk: [],
+    cxcy: [],
   };
   for (const courseType of courseTypes) {
     onEachType(courseType);
