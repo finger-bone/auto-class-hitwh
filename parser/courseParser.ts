@@ -112,6 +112,12 @@ export function parseAPage(
       const td = $(tds[i]).html();
       course[th_idx_to_field(i, colPattern)] = cleanString(td!);
     }
+    try {
+      course["code"] = $(tds[tds.length - 1]).find("input").attr('id')?.split('_')[1];
+    }
+    catch {
+      return [];
+    }
     return [course as Course];
   });
 }

@@ -36,6 +36,7 @@ export async function submitRequest(
   | "notWithinTime"
   | "illegalOperation"
   | "alreadySubmitted"
+  | "failed"
   | "unknownError"
 > {
   const token = await getToken(session, cookies, courseType, semester);
@@ -54,16 +55,19 @@ export async function submitRequest(
   // TODO: THIS ONE IS FOR PLACE HOLDING
   const duplicateSubmissionKw = "alert('您已经提交过该课程！')";
   // TODO: SHOULD BE CHANGED INTO A PERFECT MATCH
-  const successKw = /alert\('*成功*'\)/;
+  const successKw = "alert('选课成功');";
+  const failedKw = "alert('选课失败');"
   if (resp.data.includes(notWithinTimeKw)) {
     return "notWithinTime";
   } else if (resp.data.includes(illegalOperationKw)) {
     return "illegalOperation";
-  } else if (successKw.test(resp.data)) {
+  } else if (resp.data.includes(successKw)) {
     return "success";
   } else if (resp.data.includes(duplicateSubmissionKw)) {
     return "alreadySubmitted";
-  } else {
+  } else if (resp.data.includes(failedKw)) {
+    return "failed"
+  } else  {
     return "unknownError";
   }
 }
