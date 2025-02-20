@@ -56,7 +56,7 @@ export async function submitRequest(
   // TODO: THIS ONE IS FOR PLACE HOLDING
   const duplicateSubmissionKw = "alert('您已经提交过该课程！')";
   const successKw = "alert('选课成功');";
-  const failedKw = "alert('选课失败');"
+  const failedKw = "alert('选课失败');";
   const notForThisGradeKw = "alert('学生不在面向年级内，不可选课！');";
   if (resp.data.includes(notWithinTimeKw)) {
     return "notWithinTime";
@@ -67,7 +67,7 @@ export async function submitRequest(
   } else if (resp.data.includes(duplicateSubmissionKw)) {
     return "alreadySubmitted";
   } else if (resp.data.includes(failedKw)) {
-    return "failed"
+    return "failed";
   } else if (resp.data.includes(notForThisGradeKw)) {
     return "notForThisGrade";
   } else {
