@@ -31,6 +31,7 @@ const COURSE_TYPE_MAP: Record<string, string> = {
   szhx: "素质核心",
   cxyx: "创新研修",
   cxsy: "创新实验",
+  cxcy: "创新创业",
   xsyt: "新生研讨",
   tsk: "未来技术",
   xsxk: "外专业课程",
@@ -188,7 +189,7 @@ const main = async () => {
     });
 
     let session: AxiosInstance;
-    let cookies: string;
+    let cookies: string = "";
 
     if (loginType === "qr") {
       try {
@@ -253,6 +254,7 @@ const main = async () => {
         { title: "素质核心", value: "szhx" },
         { title: "创新研修", value: "cxyx" },
         { title: "创新实验", value: "cxsy" },
+        { title: "创新创业", value: "cxcy" },
         { title: "新生研讨", value: "xsyt" },
         { title: "未来技术", value: "tsk" },
         { title: "外专业课程", value: "xsxk" },
