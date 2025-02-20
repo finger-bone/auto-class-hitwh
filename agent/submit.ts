@@ -56,7 +56,7 @@ export async function submitRequest(
   const duplicateSubmissionKw = "alert('您已经提交过该课程！')";
   // TODO: SHOULD BE CHANGED INTO A PERFECT MATCH
   const successKw = "alert('选课成功');";
-  const failedKw = "alert('选课失败');"
+  const failedKw = "alert('选课失败');";
   if (resp.data.includes(notWithinTimeKw)) {
     return "notWithinTime";
   } else if (resp.data.includes(illegalOperationKw)) {
@@ -66,8 +66,8 @@ export async function submitRequest(
   } else if (resp.data.includes(duplicateSubmissionKw)) {
     return "alreadySubmitted";
   } else if (resp.data.includes(failedKw)) {
-    return "failed"
-  } else  {
+    return "failed";
+  } else {
     return "unknownError";
   }
 }
