@@ -11,14 +11,15 @@ export type CourseType =
   | "cxcy"
   | "xsyt"
   | "tsk"
-  | "xsxk";
+  | "xsxk"
+  | "sxw";
 
 export type Semester = {
   "yearStart": number;
   "semesterOrder": 1 | 2 | 3;
 };
 
-const MAX_RETRY_COUNT = 3;
+const MAX_RETRY_COUNT = 5;
 
 export function SemeterToString(semeter: Semester) {
   return `${semeter.yearStart}-${
@@ -95,6 +96,7 @@ export async function fetchCourses(
     tsk: [],
     xsxk: [],
     cxcy: [],
+    sxw: [],
   };
   for (const courseType of courseTypes) {
     onEachType(courseType);
