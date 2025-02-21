@@ -1,4 +1,4 @@
-import axios, { AxiosInstance } from "axios";
+import axios, { Axios, AxiosInstance } from "axios";
 import {
   getQRCode,
   getQRCodeStatus,
@@ -23,6 +23,7 @@ import { Buffer } from "node:buffer";
 
 const QRCODE_FILE = "login_qrcode.png";
 const COOKIE_FILE = "cookie.txt";
+const SUBMIT_TIMEOUT = 1.5 * 60 * 1000;
 
 // 类型中文映射
 const COURSE_TYPE_MAP: Record<string, string> = {
@@ -35,7 +36,34 @@ const COURSE_TYPE_MAP: Record<string, string> = {
   xsyt: "新生研讨",
   tsk: "未来技术",
   xsxk: "外专业课程",
+  sxw: "辅修",
 };
+
+async function submitWithTimeout(
+  session: Axios,
+  cookies: string,
+  type: CourseType,
+  semesterResponse: Semester,
+  code: string,
+) {
+  const timeoutPromise = new Promise<null>((_, reject) =>
+    setTimeout(() => reject(new Error("Request timed out")), SUBMIT_TIMEOUT)
+  );
+
+  // 使用 Promise.race 来竞争请求和超时
+  const result = await Promise.race([
+    submitRequest(session, cookies, type, semesterResponse, code), // 原始请求
+    timeoutPromise, // 超时处理
+  ]).catch((error) => {
+    if (error.message === "Request timed out") {
+      console.log("Request took too long, continuing loop...");
+      return null; // 或者返回一个默认值，继续循环
+    }
+    throw error; // 如果是其他错误，抛出异常
+  });
+
+  return result;
+}
 
 // 改进的筛选逻辑
 async function filterCourses(courses: Course[]) {
@@ -258,6 +286,7 @@ const main = async () => {
         { title: "新生研讨", value: "xsyt" },
         { title: "未来技术", value: "tsk" },
         { title: "外专业课程", value: "xsxk" },
+        { title: "辅修", value: "sxw" },
       ],
       hints: "↑↓: 浏览 | 空格: 选择 | Enter: 确认",
       min: 1,
@@ -370,14 +399,20 @@ const main = async () => {
             second: "2-digit",
             fractionalSecondDigits: 3,
           }).replace(" ", "时间："); // 使用 T 来分隔日期和时间
-          const result = await submitRequest(
+          const result = await submitWithTimeout(
             session,
             cookies,
             type as CourseType,
             semesterResponse,
             code,
           );
-          if (result === "success") {
+
+          if (result === null) {
+            submitSpinner.warn(
+              `[${formattedTime}] [${type}] ${code} ${name}：请求超时！`,
+            );
+            continue;
+          } else if (result === "success") {
             submitSpinner.succeed(
               `[${formattedTime}] ${type} ${code} ${name}：申请成功`,
             );
@@ -393,7 +428,7 @@ const main = async () => {
             );
           } else {
             submitSpinner.fail(
-              `[${formattedTime}] [${type}] ${code} ${name}: 其它错误 ${result}`,
+              `[${formattedTime}] [${type}] ${code} ${name}: 其它错误 ${result} ，或课程已申请成功，或容量已满。`,
             );
           }
         } catch (err) {
