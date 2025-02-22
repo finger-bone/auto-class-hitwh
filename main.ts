@@ -203,6 +203,15 @@ const main = async () => {
 `;
 
     console.log(tip_text);
+
+    console.log(`
+请使用非校园网环境进行操作。
+
+请在选课开始前若干小时启动程序
+
+作者不对使用本程序造成的任何后果负责
+`);
+
     // 登录方式选择
     const { loginType } = await prompts({
       type: "select",
@@ -211,7 +220,7 @@ const main = async () => {
       choices: [
         { title: "扫码登录", value: "qr" },
         { title: "手动输入Cookie", value: "manual" },
-        { title: "使用上次保存的Cookie (仅若干小时以内有效)", value: "last" },
+        { title: "使用上次保存的Cookie (本程序退出若干小时后，保存的 Cookie 将会失效)", value: "last" },
       ],
       instructions: false,
     });
@@ -426,9 +435,17 @@ const main = async () => {
             submitSpinner.succeed(
               `[${formattedTime}] [${type}] ${code} ${name}：重复了已成功的申请！`,
             );
+          } else if (result === "notForThisGrade") {
+            submitSpinner.warn(
+              `[${formattedTime}] [${type}] ${code} ${name}：不在当前年级时间内！`,
+            );
+          } else if (result === "outOfCapacity") {
+            submitSpinner.warn(
+              `[${formattedTime}] [${type}] ${code} ${name}：容量已满！`,
+            );
           } else {
             submitSpinner.fail(
-              `[${formattedTime}] [${type}] ${code} ${name}: 其它错误 ${result} ，或课程已申请成功，或容量已满。`,
+              `[${formattedTime}] [${type}] ${code} ${name}: 其它错误 ${result}`,
             );
           }
         } catch (err) {

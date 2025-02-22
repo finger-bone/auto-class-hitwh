@@ -20,7 +20,6 @@ export async function getToken(
     },
   });
   const page$ = cheerio.load(resp.data);
-  // find <input type="hidden" id="token" name="token" value="0.6862564138122748">
   const token = page$("input#token").val() as string;
   return token;
 }
@@ -39,6 +38,7 @@ export async function submitRequest(
   | "alreadySubmitted"
   | "failed"
   | "unknownError"
+  | "outOfCapacity"
 > {
   const token = await getToken(session, cookies, courseType, semester);
   const formData = new URLSearchParams();
@@ -53,11 +53,11 @@ export async function submitRequest(
   });
   const notWithinTimeKw = "alert('不在学生选课时间范围内！')";
   const illegalOperationKw = "alert('非法操作！');";
-  // TODO: THIS ONE IS FOR PLACE HOLDING
-  const duplicateSubmissionKw = "alert('您已经提交过该课程！')";
+  const duplicateSubmissionKw = "alert('此课程已选，不可重复选课！');";
   const successKw = "alert('选课成功');";
-  const failedKw = "alert('选课失败');"
+  const failedKw = "alert('选课失败');";
   const notForThisGradeKw = "alert('学生不在面向年级内，不可选课！');";
+  const outOfCapacityKw = "alert('总容量已满，请选择其它课程！');";
   if (resp.data.includes(notWithinTimeKw)) {
     return "notWithinTime";
   } else if (resp.data.includes(illegalOperationKw)) {
@@ -67,9 +67,11 @@ export async function submitRequest(
   } else if (resp.data.includes(duplicateSubmissionKw)) {
     return "alreadySubmitted";
   } else if (resp.data.includes(failedKw)) {
-    return "failed"
+    return "failed";
   } else if (resp.data.includes(notForThisGradeKw)) {
     return "notForThisGrade";
+  } else if (resp.data.includes(outOfCapacityKw)) {
+    return "outOfCapacity";
   } else {
     return "unknownError";
   }

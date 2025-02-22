@@ -17,6 +17,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
 
       - name: Set up Deno
         uses: denoland/setup-deno@v2
@@ -40,12 +42,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-  compile:
+  compile-non-windows:
     runs-on: ubuntu-latest
     needs: format
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          ref: main
+          fetch-depth: 0
 
       - name: Set up Deno
         uses: denoland/setup-deno@v2
@@ -61,15 +66,71 @@ jobs:
       - name: Compile for macOS Intel
         run: deno compile --target x86_64-apple-darwin -o ./dist/auto-class-macos-x86_64 -A ./main.ts
 
+      - name: Upload non-Windows artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: non-windows-binaries
+          path: ./dist/
+          retention-days: 1
+
+  compile-windows:
+    runs-on: windows-latest
+    needs: format
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Set up Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
       - name: Compile for Windows
         run: deno compile --target x86_64-pc-windows-msvc -o ./dist/auto-class-windows.exe -A ./main.ts
 
-      - name: Create a Git tag
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-binary
+          path: ./dist/auto-class-windows.exe
+          retention-days: 1
+
+  release:
+    runs-on: ubuntu-latest
+    needs: [compile-non-windows, compile-windows]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Download non-Windows artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: non-windows-binaries
+          path: ./dist
+
+      - name: Download Windows artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: windows-binary
+          path: ./dist
+
+      - name: Generate version number
         run: |
           VERSION=$(date +'%Y%m%d%H%M%S')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
-          git tag "v$VERSION"
-          git push origin "v$VERSION"
+
+      - name: Create Git tag
+        run: |
+          git config --global user.name "github-actions"
+          git config --global user.email "github-actions@github.com"
+          git tag "v${{ env.VERSION }}"
+          git push origin "v${{ env.VERSION }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -77,6 +138,9 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           tag_name: "v${{ env.VERSION }}"
-          files: ./dist/*
+          files: |
+            ./dist/auto-class-linux
+            ./dist/auto-class-macos-*
+            ./dist/auto-class-windows.exe
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
