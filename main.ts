@@ -220,7 +220,11 @@ const main = async () => {
       choices: [
         { title: "扫码登录", value: "qr" },
         { title: "手动输入Cookie", value: "manual" },
-        { title: "使用上次保存的Cookie (本程序退出若干小时后，保存的 Cookie 将会失效)", value: "last" },
+        {
+          title:
+            "使用上次保存的Cookie (本程序退出若干小时后，保存的 Cookie 将会失效)",
+          value: "last",
+        },
       ],
       instructions: false,
     });
