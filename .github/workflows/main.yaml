@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -47,7 +47,7 @@ jobs:
     needs: format
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0
@@ -67,10 +67,12 @@ jobs:
         run: deno compile --target x86_64-apple-darwin -o ./dist/auto-class-macos-x86_64 -A ./main.ts
 
       - name: Upload non-Windows artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: non-windows-binaries
-          path: ./dist/
+          path: |
+            ./dist/auto-class-linux
+            ./dist/auto-class-macos-*
           retention-days: 1
 
   compile-windows:
@@ -78,7 +80,7 @@ jobs:
     needs: format
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0
@@ -92,7 +94,7 @@ jobs:
         run: deno compile --target x86_64-pc-windows-msvc -o ./dist/auto-class-windows.exe -A ./main.ts
 
       - name: Upload Windows artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: windows-binary
           path: ./dist/auto-class-windows.exe
@@ -103,22 +105,16 @@ jobs:
     needs: [compile-non-windows, compile-windows]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: main
           fetch-depth: 0
 
-      - name: Download non-Windows artifacts
-        uses: actions/download-artifact@v3
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
         with:
-          name: non-windows-binaries
           path: ./dist
-
-      - name: Download Windows artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: windows-binary
-          path: ./dist
+          merge-multiple: true
 
       - name: Generate version number
         run: |
