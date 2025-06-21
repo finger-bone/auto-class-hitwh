@@ -1,3 +1,5 @@
+# Hack
+
 请求 `https://webvpn.hitwh.edu.cn`，redirect 得到一个有额外内容的，形如
 
 ```txt
