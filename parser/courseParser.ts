@@ -84,7 +84,7 @@ function th_idx_to_field(idx: number, colPattern: ColPattern): string {
         return "capacity";
     }
     throw new Error(`Invalid index: ${idx}`);
-  } else if(colPattern === "14TY") {
+  } else if (colPattern === "14TY") {
     switch (idx) {
       case 0:
         return "button";
@@ -163,8 +163,8 @@ export function parseCourses(
 ): Record<string, Array<Course>> {
   return Object.keys(htmls).reduce((acc, key) => {
     acc[key] = htmls[key].reduce((acc, html) => {
-      const coursePattern = (()=>{
-        if(key === "ty") {
+      const coursePattern = (() => {
+        if (key === "ty") {
           return "14TY";
         } else {
           return html.includes("课程性质") ? "14NOT-TY" : "13";
