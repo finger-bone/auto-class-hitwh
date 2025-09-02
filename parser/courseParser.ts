@@ -122,6 +122,54 @@ function th_idx_to_field(idx: number, colPattern: ColPattern): string {
   throw new Error(`Invalid colPattern: ${colPattern}`);
 }
 
+function th_idx_to_field_fallback(idx: number, tdsLength: number) {
+  if(tdsLength === 15) {
+    return th_idx_to_field(idx, "14NOT-TY");
+  }
+  else if(tdsLength === 14) {
+    return th_idx_to_field(idx, "13");
+  } else {
+    if(idx === 0) {
+      return "button"
+    }
+    if(idx === 1) {
+      return "number";
+    }
+    if(idx === 2) {
+      return "code";
+    }
+    if(idx === 3) {
+      return "name";
+    }
+    if(idx === 4) {
+      return "prerequisite";
+    }
+    if(idx === 5) {
+      return "qualification";
+    }
+    if(idx === 6) {
+      return "campus";
+    }
+    if(idx === 7) {
+      return "info";
+    }
+    if(idx === tdsLength - 1) {
+      return "capacity";
+    }
+    if(idx === tdsLength - 2) {
+      return "requirement";
+    }
+    if(idx === tdsLength - 3) {
+      return "duration";
+    }
+    if(idx === tdsLength - 4) {
+      return "credit";
+    }
+
+    return "unknown"
+  }
+}
+
 function cleanString(src: string): string {
   // remove all the html tags
   return src.replace("<br>", "\n")
@@ -145,7 +193,13 @@ export function parseAPage(
     const course = {} as any;
     for (let i = 0; i < tds.length; i++) {
       const td = $(tds[i]).html();
-      course[th_idx_to_field(i, colPattern)] = cleanString(td!);
+      try {
+        course[th_idx_to_field(i, colPattern)] = cleanString(td!);
+      } catch (e) {
+        console.log(`解析时遇到错误：${e} 。\n`);
+        console.log(`将进入容错模式，之后可能会出现信息缺失。如果之后再出错，请提供 教务系统选课界面截图 ，并开启 issue。\n`)
+        course[th_idx_to_field_fallback(i, tds.length)] = cleanString(td!);
+      }
     }
     try {
       course["code"] = $(tds[tds.length - 1]).find("input").attr("id")?.split(
