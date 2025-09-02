@@ -14,7 +14,8 @@ export type Course = {
   "capacity": string;
 };
 
-type ColPattern = "13" | "14";
+// 13 栏， 14非体育， 14体育
+type ColPattern = "13" | "14NOT-TY" | "14TY";
 
 function th_idx_to_field(idx: number, colPattern: ColPattern): string {
   if (colPattern === "13") {
@@ -49,7 +50,7 @@ function th_idx_to_field(idx: number, colPattern: ColPattern): string {
         return "capacity";
     }
     throw new Error(`Invalid index: ${idx}`);
-  } else if (colPattern === "14") {
+  } else if (colPattern === "14NOT-TY") {
     switch (idx) {
       case 0:
         return "button";
@@ -69,6 +70,40 @@ function th_idx_to_field(idx: number, colPattern: ColPattern): string {
         return "info";
       case 8:
         return "type";
+      case 9:
+        return "compulsory";
+      case 10:
+        return "department";
+      case 11:
+        return "credit";
+      case 12:
+        return "duration";
+      case 13:
+        return "requirement";
+      case 14:
+        return "capacity";
+    }
+    throw new Error(`Invalid index: ${idx}`);
+  } else if(colPattern === "14TY") {
+    switch (idx) {
+      case 0:
+        return "button";
+      case 1:
+        return "number";
+      case 2:
+        return "code";
+      case 3:
+        return "name";
+      case 4:
+        return "prerequisite";
+      case 5:
+        return "qualification";
+      case 6:
+        return "campus";
+      case 7:
+        return "info";
+      case 8:
+        return "schedule-info";
       case 9:
         return "compulsory";
       case 10:
@@ -128,7 +163,13 @@ export function parseCourses(
 ): Record<string, Array<Course>> {
   return Object.keys(htmls).reduce((acc, key) => {
     acc[key] = htmls[key].reduce((acc, html) => {
-      const coursePattern = html.includes("课程性质") ? "14" : "13";
+      const coursePattern = (()=>{
+        if(key === "ty") {
+          return "14TY";
+        } else {
+          return html.includes("课程性质") ? "14NOT-TY" : "13";
+        }
+      })() as ColPattern;
       acc.push(...parseAPage(html, coursePattern));
       return acc;
     }, [] as Array<Course>);
