@@ -88,6 +88,7 @@ export function parseAPage(html: string): Array<Course> {
       const inputId = $(tds[tds.length - 1]).find("input").attr("id");
       course["code"] = inputId?.split("_")[1] ?? course["code"] ?? "";
     } catch {
+      console.error("\n\n当前页解析出错，将会跳过，请提交issue");
       return [];
     }
     return [course as Course];
