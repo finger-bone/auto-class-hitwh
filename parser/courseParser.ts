@@ -14,160 +14,27 @@ export type Course = {
   "capacity": string;
 };
 
-// 13 栏， 14非体育， 14体育
-type ColPattern = "13" | "14NOT-TY" | "14TY";
-
-function th_idx_to_field(idx: number, colPattern: ColPattern): string {
-  if (colPattern === "13") {
-    switch (idx) {
-      case 0:
-        return "button";
-      case 1:
-        return "number";
-      case 2:
-        return "code";
-      case 3:
-        return "name";
-      case 4:
-        return "prerequisite";
-      case 5:
-        return "qualification";
-      case 6:
-        return "campus";
-      case 7:
-        return "info";
-      case 8:
-        return "type";
-      case 9:
-        return "department";
-      case 10:
-        return "credit";
-      case 11:
-        return "duration";
-      case 12:
-        return "requirement";
-      case 13:
-        return "capacity";
-    }
-    throw new Error(`Invalid index: ${idx}`);
-  } else if (colPattern === "14NOT-TY") {
-    switch (idx) {
-      case 0:
-        return "button";
-      case 1:
-        return "number";
-      case 2:
-        return "code";
-      case 3:
-        return "name";
-      case 4:
-        return "prerequisite";
-      case 5:
-        return "qualification";
-      case 6:
-        return "campus";
-      case 7:
-        return "info";
-      case 8:
-        return "type";
-      case 9:
-        return "compulsory";
-      case 10:
-        return "department";
-      case 11:
-        return "credit";
-      case 12:
-        return "duration";
-      case 13:
-        return "requirement";
-      case 14:
-        return "capacity";
-    }
-    throw new Error(`Invalid index: ${idx}`);
-  } else if (colPattern === "14TY") {
-    switch (idx) {
-      case 0:
-        return "button";
-      case 1:
-        return "number";
-      case 2:
-        return "code";
-      case 3:
-        return "name";
-      case 4:
-        return "prerequisite";
-      case 5:
-        return "qualification";
-      case 6:
-        return "campus";
-      case 7:
-        return "info";
-      case 8:
-        return "schedule-info";
-      case 9:
-        return "compulsory";
-      case 10:
-        return "department";
-      case 11:
-        return "credit";
-      case 12:
-        return "duration";
-      case 13:
-        return "requirement";
-      case 14:
-        return "capacity";
-    }
-    throw new Error(`Invalid index: ${idx}`);
-  }
-  throw new Error(`Invalid colPattern: ${colPattern}`);
-}
-
-function th_idx_to_field_fallback(idx: number, tdsLength: number) {
-  if (tdsLength === 15) {
-    return th_idx_to_field(idx, "14NOT-TY");
-  } else if (tdsLength === 14) {
-    return th_idx_to_field(idx, "13");
-  } else {
-    if (idx === 0) {
-      return "button";
-    }
-    if (idx === 1) {
-      return "number";
-    }
-    if (idx === 2) {
-      return "code";
-    }
-    if (idx === 3) {
-      return "name";
-    }
-    if (idx === 4) {
-      return "prerequisite";
-    }
-    if (idx === 5) {
-      return "qualification";
-    }
-    if (idx === 6) {
-      return "campus";
-    }
-    if (idx === 7) {
-      return "info";
-    }
-    if (idx === tdsLength - 1) {
-      return "capacity";
-    }
-    if (idx === tdsLength - 2) {
-      return "requirement";
-    }
-    if (idx === tdsLength - 3) {
-      return "duration";
-    }
-    if (idx === tdsLength - 4) {
-      return "credit";
-    }
-
-    return "unknown";
-  }
-}
+// 表头文字 → 字段名。教务系统选课表列结构经常变，这里按表头名做映射，
+// 而不是按固定列索引，避免“Invalid index: N”这类错位。
+const HEADER_RULES: Array<[RegExp, string]> = [
+  [/课程代码/, "code"],
+  [/课程名称/, "name"],
+  [/前置课程/, "prerequisite"],
+  [/面向对象/, "qualification"],
+  [/校区/, "campus"],
+  [/上课信息/, "info"],
+  [/排课信息/, "schedule-info"],
+  [/课程类别/, "type"],
+  [/课程性质/, "compulsory"],
+  [/开课院系/, "department"],
+  [/学分/, "credit"],
+  [/学时/, "duration"],
+  [/备注信息/, "remark"],
+  [/选课要求/, "requirement"],
+  [/已选\/容量/, "capacity"],
+  [/容量/, "capacity"],
+  [/序号/, "number"],
+];
 
 function cleanString(src: string): string {
   // remove all the html tags
@@ -177,35 +44,49 @@ function cleanString(src: string): string {
     .trim();
 }
 
-export function parseAPage(
-  html: string,
-  colPattern: ColPattern,
-): Array<Course> {
+function normalizeHeader(text: string): string {
+  // 去掉排序箭头和空白
+  return text.replace(/[↑↓\s]/g, "");
+}
+
+// 从表头 <th> 读出一列对应字段名；第一列通常是选择框/序号按钮，返回 "button"。
+function buildFieldMap(
+  $: cheerio.CheerioAPI,
+  // deno-lint-ignore no-explicit-any
+  table: any,
+): string[] {
+  const headerTr = table.find("tr").first();
+  const ths = headerTr.find("th").toArray();
+  return ths.map((th: any) => {
+    const text = normalizeHeader($(th).text());
+    if (text === "") return "button";
+    for (const [re, field] of HEADER_RULES) {
+      if (re.test(text)) return field;
+    }
+    return "unknown";
+  });
+}
+
+export function parseAPage(html: string): Array<Course> {
   const $ = cheerio.load(html);
   // find the only tbody with class bot_line
-  const tbody = $("table.bot_line").first();
-  const trs = tbody.find("tr").toArray();
+  const table = $("table.bot_line").first();
+  const fieldMap = buildFieldMap($, table);
+  const trs = table.find("tr").toArray();
   return trs.flatMap((tr) => {
     const tds = $(tr).find("td").toArray();
+    // 表头行是 <th>，没有 <td>，跳过
     if (tds.length === 0) return [];
     // deno-lint-ignore no-explicit-any
     const course = {} as any;
     for (let i = 0; i < tds.length; i++) {
-      const td = $(tds[i]).html();
-      try {
-        course[th_idx_to_field(i, colPattern)] = cleanString(td!);
-      } catch (e) {
-        console.log(`解析时遇到错误：${e} 。\n`);
-        console.log(
-          `将进入容错模式，之后可能会出现信息缺失。如果之后再出错，请提供 教务系统选课界面截图 ，并开启 issue。\n`,
-        );
-        course[th_idx_to_field_fallback(i, tds.length)] = cleanString(td!);
-      }
+      const field = fieldMap[i] ?? "unknown";
+      course[field] = cleanString($(tds[i]).html() ?? "");
     }
     try {
-      course["code"] = $(tds[tds.length - 1]).find("input").attr("id")?.split(
-        "_",
-      )[1];
+      // rwh（选课用的课程标识）放在最后一列的 input 的 id 里，形如 xxx_<rwh>
+      const inputId = $(tds[tds.length - 1]).find("input").attr("id");
+      course["code"] = inputId?.split("_")[1] ?? course["code"] ?? "";
     } catch {
       return [];
     }
@@ -218,14 +99,7 @@ export function parseCourses(
 ): Record<string, Array<Course>> {
   return Object.keys(htmls).reduce((acc, key) => {
     acc[key] = htmls[key].reduce((acc, html) => {
-      const coursePattern = (() => {
-        if (key === "ty") {
-          return "14TY";
-        } else {
-          return html.includes("课程性质") ? "14NOT-TY" : "13";
-        }
-      })() as ColPattern;
-      acc.push(...parseAPage(html, coursePattern));
+      acc.push(...parseAPage(html));
       return acc;
     }, [] as Array<Course>);
     return acc;
